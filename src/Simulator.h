@@ -96,10 +96,10 @@ inline std::vector<Probe*> Simulator::collectProbes() {
         return probes;
     }
     
+    // Gebruik polymorfisme in plaats van dynamic_cast
     for (Component* component : circuit->getComponents()) {
-        Probe* probe = dynamic_cast<Probe*>(component);
-        if (probe) {
-            probes.push_back(probe);
+        if (component->isProbe()) {
+            probes.push_back(component->asProbe());
         }
     }
     
@@ -144,19 +144,6 @@ inline void Simulator::simulate(int timeSteps) {
                     Component* target = edge->getTarget();
                     int delay = target->getPropagationDelay();
                     eventQueue.push({target, currentTime + delay});
-                }
-            }
-        }
-        
-        // Record waarden voor probes
-        Probe* probe = dynamic_cast<Probe*>(event.component);
-        if (probe) {
-            // Voor een Probe, kijk naar de componenten die eraan verbonden zijn
-            for (Edge* edge : circuit->getEdges()) {
-                if (edge->getTarget() == probe) {
-                    Component* source = edge->getSource();
-                    probe->recordValue(source->getOutputValue());
-                    break;
                 }
             }
         }

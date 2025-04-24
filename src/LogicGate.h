@@ -17,6 +17,11 @@ public:
     Component* getInput(int index) const;
     int getInputCount() const;
     
+    // Implementeert de Component interface
+    Type getType() const override { return Type::LOGIC_GATE; }
+    bool isLogicGate() const override { return true; }
+    LogicGate* asLogicGate() override { return this; }
+    
     // calculateOutput wordt geïmplementeerd door specifieke poorten
     virtual bool calculateOutput() override = 0;
 
@@ -35,7 +40,7 @@ inline void LogicGate::addInput(Component* input) {
 }
 
 inline Component* LogicGate::getInput(int index) const {
-    if (index < 0 || index >= inputs.size()) {
+    if (index < 0 || static_cast<size_t>(index) >= inputs.size()) {
         return nullptr;
     }
     return inputs[index];

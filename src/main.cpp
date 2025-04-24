@@ -2,12 +2,7 @@
 #include "Simulator.h"
 #include "InputFileHandler.h"
 #include "OutputHandler.h"
-#include "ANDGate.h"
-#include "ORGate.h"
-#include "NOTGate.h"
-#include "XORGate.h"  // Toegevoegd voor XORGate gebruik
-#include "Input.h"
-#include "Probe.h"
+#include "ComponentFactory.h"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -16,13 +11,13 @@
 Circuit* createHalfAdderCircuit() {
     Circuit* circuit = new Circuit();
     
-    // Maak de componenten
-    Input* inputA = new Input("A");
-    Input* inputB = new Input("B");
-    ANDGate* andGate = new ANDGate("AND1");
-    XORGate* xorGate = new XORGate("XOR1");
-    Probe* carryProbe = new Probe("Carry");
-    Probe* sumProbe = new Probe("Sum");
+    // Maak de componenten met de ComponentFactory (Factory pattern)
+    Component* inputA = ComponentFactory::createComponent(ComponentFactory::ComponentType::INPUT, "A");
+    Component* inputB = ComponentFactory::createComponent(ComponentFactory::ComponentType::INPUT, "B");
+    Component* andGate = ComponentFactory::createComponent(ComponentFactory::ComponentType::AND, "AND1");
+    Component* xorGate = ComponentFactory::createComponent(ComponentFactory::ComponentType::XOR, "XOR1");
+    Component* carryProbe = ComponentFactory::createComponent(ComponentFactory::ComponentType::PROBE, "Carry");
+    Component* sumProbe = ComponentFactory::createComponent(ComponentFactory::ComponentType::PROBE, "Sum");
     
     // Voeg componenten toe aan het circuit
     circuit->addComponent(inputA);
@@ -32,34 +27,39 @@ Circuit* createHalfAdderCircuit() {
     circuit->addComponent(carryProbe);
     circuit->addComponent(sumProbe);
     
-    // Configureer inputs voor de gates explicit
-    andGate->addInput(inputA);
-    andGate->addInput(inputB);
+    // Configureer inputs voor de gates met de polymorfische interface
+    andGate->asLogicGate()->addInput(inputA);
+    andGate->asLogicGate()->addInput(inputB);
     
-    xorGate->addInput(inputA);
-    xorGate->addInput(inputB);
+    xorGate->asLogicGate()->addInput(inputA);
+    xorGate->asLogicGate()->addInput(inputB);
     
-    // Verbind de componenten (maak edges)
-    // AND gate connections
+    // Verbind de componenten met edges
     circuit->addEdge(new Edge(inputA, andGate));
     circuit->addEdge(new Edge(inputB, andGate));
     circuit->addEdge(new Edge(andGate, carryProbe));
     
-    // XOR gate connections
     circuit->addEdge(new Edge(inputA, xorGate));
     circuit->addEdge(new Edge(inputB, xorGate));
     circuit->addEdge(new Edge(xorGate, sumProbe));
+    
+    // Set up observers (Observer pattern)
+    carryProbe->asProbe()->observeComponent(andGate);
+    sumProbe->asProbe()->observeComponent(xorGate);
     
     return circuit;
 }
 
 // Voorbeeld van hoe een circuit te simuleren
 void simulateHalfAdder(Circuit* circuit) {
-    // Zet input waarden
-    Input* inputA = dynamic_cast<Input*>(circuit->getComponent("A"));
-    Input* inputB = dynamic_cast<Input*>(circuit->getComponent("B"));
+    // Zet input waarden, zonder casts te gebruiken
+    Component* componentA = circuit->getComponent("A");
+    Component* componentB = circuit->getComponent("B");
     
-    if (inputA && inputB) {
+    if (componentA && componentB && componentA->isInput() && componentB->isInput()) {
+        Input* inputA = componentA->asInput();
+        Input* inputB = componentB->asInput();
+        
         std::cout << "Simulating Half Adder with various inputs..." << std::endl;
         OutputHandler outputHandler;
         Simulator simulator(circuit);

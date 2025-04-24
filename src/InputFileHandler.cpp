@@ -1,11 +1,6 @@
 #include "InputFileHandler.h"
-#include "ANDGate.h"
-#include "ORGate.h"
-#include "NOTGate.h"
-#include "NANDGate.h"
-#include "NORGate.h"
-#include "XORGate.h"
-#include "Input.h"
+#include "ComponentFactory.h"
+#include "LogicGate.h"
 #include "Probe.h"
 #include <fstream>
 #include <sstream>
@@ -44,7 +39,6 @@ Circuit* InputFileHandler::readCircuit(const std::string& filename) {
 // Helper methode om de componenten te parsen uit de bestandsinhoud
 void InputFileHandler::parseComponents(Circuit* circuit, const std::string& content) {
     // Eenvoudige parselogica voor demonstratie
-    // In een echte implementatie zou je hier een grondiger parser maken
     
     std::istringstream stream(content);
     std::string line;
@@ -61,35 +55,18 @@ void InputFileHandler::parseComponents(Circuit* circuit, const std::string& cont
         
         lineStream >> type >> id;
         
-        if (type == "INPUT") {
-            circuit->addComponent(new Input(id));
+        // Gebruik de ComponentFactory om component te maken
+        try {
+            if (type == "AND" || type == "OR" || type == "NOT" || 
+                type == "NAND" || type == "NOR" || type == "XOR") {
+                lineStream >> delay; // probeer een vertraging te lezen
+            }
+            
+            Component* component = ComponentFactory::createComponent(type, id, delay);
+            circuit->addComponent(component);
         }
-        else if (type == "PROBE") {
-            circuit->addComponent(new Probe(id));
-        }
-        else if (type == "AND") {
-            lineStream >> delay; // probeer een vertraging te lezen
-            circuit->addComponent(new ANDGate(id, delay));
-        }
-        else if (type == "OR") {
-            lineStream >> delay;
-            circuit->addComponent(new ORGate(id, delay));
-        }
-        else if (type == "NOT") {
-            lineStream >> delay;
-            circuit->addComponent(new NOTGate(id, delay));
-        }
-        else if (type == "NAND") {
-            lineStream >> delay;
-            circuit->addComponent(new NANDGate(id, delay));
-        }
-        else if (type == "NOR") {
-            lineStream >> delay;
-            circuit->addComponent(new NORGate(id, delay));
-        }
-        else if (type == "XOR") {
-            lineStream >> delay;
-            circuit->addComponent(new XORGate(id, delay));
+        catch (const std::exception& e) {
+            // Ongeldig componenttype, sla over
         }
     }
 }
@@ -118,9 +95,15 @@ void InputFileHandler::parseConnections(Circuit* circuit, const std::string& con
                 circuit->addEdge(new Edge(source, target));
                 
                 // Als het een LogicGate is, voeg de input toe aan de gate
-                LogicGate* gate = dynamic_cast<LogicGate*>(target);
-                if (gate) {
+                if (target->isLogicGate()) {
+                    LogicGate* gate = target->asLogicGate();
                     gate->addInput(source);
+                }
+                
+                // Als het target een Probe is, laat het de source observeren
+                if (target->isProbe()) {
+                    Probe* probe = target->asProbe();
+                    probe->observeComponent(source);
                 }
             }
         }

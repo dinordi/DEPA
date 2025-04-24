@@ -13,6 +13,11 @@ public:
     // Stelt de waarde van de input in
     void setValue(bool value);
     
+    // Implementeert de Component interface
+    Type getType() const override { return Type::INPUT; }
+    bool isInput() const override { return true; }
+    Input* asInput() override { return this; }
+    
     // Implementeert de abstracte methode van Component
     bool calculateOutput() override;
 };
