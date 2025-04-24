@@ -1,0 +1,88 @@
+classDiagram
+    direction LR
+
+    class Circuit {
+        +List<Component> components
+        +List<Edge> edges
+        +addComponent(Component c)
+        +addEdge(Edge e)
+        +getComponent(string id) Component
+    }
+
+    class Component {
+        <<abstract>>
+        +string id
+        +int propagationDelay
+        +bool outputValue
+        +List<Component> inputs
+        +List<Component> outputs
+        +calculateOutput() bool
+    }
+
+    class LogicGate {
+        <<abstract>>
+        +calculateOutput() bool
+    }
+
+    class Input {
+        +setValue(bool value)
+    }
+
+    class Probe {
+        +bool recordedValue
+        +recordValue(bool value)
+    }
+
+    class ANDGate
+    class ORGate
+    class NOTGate
+    class NANDGate
+    class NORGate
+    class XORGate
+
+    class Edge {
+        +Component source
+        +Component target
+    }
+
+    class Simulator {
+        +Circuit circuit
+        +InputFileHandler inputFileHandler
+        +OutputHandler outputHandler
+        +simulate()
+    }
+
+    class InputFileHandler {
+        +readCircuit(string filename) Circuit
+    }
+
+    class OutputHandler {
+        +writeResults(List<Probe> probes)
+    }
+
+    Circuit "1" *-- "*" Component : bevat
+    Circuit "1" *-- "*" Edge : bevat
+
+    Component <|-- LogicGate
+    Component <|-- Input
+    Component <|-- Probe
+
+    LogicGate <|-- ANDGate
+    LogicGate <|-- ORGate
+    LogicGate <|-- NOTGate
+    LogicGate <|-- NANDGate
+    LogicGate <|-- NORGate
+    LogicGate <|-- XORGate
+
+    Edge "0..*" -- "1" Component : bron
+    Edge "0..*" -- "1" Component : doel
+
+    Simulator "1" -- "1" Circuit : simuleert
+    Simulator "1" -- "1" InputFileHandler : gebruikt
+    Simulator "1" -- "1" OutputHandler : gebruikt
+
+    InputFileHandler "1" -- "1" Circuit : creëert
+    OutputHandler "1" -- "*" Probe : rapporteert over
+
+    Component "1" -- "*" Component : heeft ingang(en)
+    Component "1" -- "*" Component : heeft uitgang(en)
