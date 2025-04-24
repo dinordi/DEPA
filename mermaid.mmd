@@ -2,6 +2,8 @@ classDiagram
     direction LR
 
     class Circuit {
+        <<Circuit>>
+        "Representeerd het gehele digitale circuit"
         +List<Component> components
         +List<Edge> edges
         +addComponent(Component c)
@@ -11,41 +13,51 @@ classDiagram
 
     class Component {
         <<abstract>>
+        "Abstracte basis voor alle circuit elementen"
         +string id
         +int propagationDelay
         +bool outputValue
-        +List<Component> inputs
-        +List<Component> outputs
-        +calculateOutput() bool
+        +calculateOutput()* bool
     }
 
     class LogicGate {
         <<abstract>>
+        "Abstract basis voor logic gates"
         +calculateOutput() bool
     }
 
     class Input {
+        <<Input Source>>
+        "Externe input bron voor het circuit"
         +setValue(bool value)
+        +calculateOutput() bool
     }
 
     class Probe {
+        <<Measurement Point>>
+        "Luistert signaal value op een bepaald punt"
         +bool recordedValue
         +recordValue(bool value)
+        +calculateOutput() bool
     }
 
-    class ANDGate
-    class ORGate
-    class NOTGate
-    class NANDGate
-    class NORGate
-    class XORGate
+    class ANDGate { "Implementeerd AND logic" }
+    class ORGate { "Implementeerd OR logic" }
+    class NOTGate { "Implementeerd NOT logic" }
+    class NANDGate { "Implementeerd NAND logic" }
+    class NORGate { "Implementeerd NOR logic" }
+    class XORGate { "Implementeerd XOR logic" }
 
     class Edge {
+        <<Connection>>
+        "Representeerd een verbinding tussen componenten"
         +Component source
         +Component target
     }
 
     class Simulator {
+        <<Simulation Engine>>
+        "Beheert de simulatie"
         +Circuit circuit
         +InputFileHandler inputFileHandler
         +OutputHandler outputHandler
@@ -53,10 +65,14 @@ classDiagram
     }
 
     class InputFileHandler {
+        <<File Parser>>
+        "Leest circuit definities uit een bestand"
         +readCircuit(string filename) Circuit
     }
 
     class OutputHandler {
+        <<Result Writer>>
+        "Schrijft de resultaten naar een bestand of console"
         +writeResults(List<Probe> probes)
     }
 
@@ -74,8 +90,8 @@ classDiagram
     LogicGate <|-- NORGate
     LogicGate <|-- XORGate
 
-    Edge "0..*" -- "1" Component : bron
-    Edge "0..*" -- "1" Component : doel
+    Edge "1" -- "1" Component : source
+    Edge "1" -- "1" Component : target
 
     Simulator "1" -- "1" Circuit : simuleert
     Simulator "1" -- "1" InputFileHandler : gebruikt
@@ -83,6 +99,3 @@ classDiagram
 
     InputFileHandler "1" -- "1" Circuit : creëert
     OutputHandler "1" -- "*" Probe : rapporteert over
-
-    Component "1" -- "*" Component : heeft ingang(en)
-    Component "1" -- "*" Component : heeft uitgang(en)
