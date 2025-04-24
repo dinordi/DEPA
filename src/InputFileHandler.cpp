@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <iostream>
 #include <map>
 
 // Leest een circuit beschrijving uit een bestand
@@ -28,6 +29,7 @@ Circuit* InputFileHandler::readCircuit(const std::string& filename) {
         parseConnections(circuit, content);
     }
     catch (const std::exception& e) {
+        std::cout << "Fout bij het parseren van het circuit: " << e.what() << std::endl;
         // Bij een fout, ruim het circuit op en return nullptr
         delete circuit;
         return nullptr;
