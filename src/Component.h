@@ -32,6 +32,12 @@ public:
     void setOutputValue(bool value);
     
     /**
+     * @brief Set a new ID for the component
+     * @param newId The new ID to assign
+     */
+    void setId(const std::string& newId);
+    
+    /**
      * @brief Abstracte methode om de uitgangswaarde te berekenen
      * @return De berekende uitgangswaarde
      */
@@ -128,6 +134,10 @@ inline void Component::setOutputValue(bool value) {
     if (oldValue != value) {
         notifyObservers();
     }
+}
+
+inline void Component::setId(const std::string& newId) {
+    id = newId;
 }
 
 inline void Component::addObserver(ComponentObserver* observer) {

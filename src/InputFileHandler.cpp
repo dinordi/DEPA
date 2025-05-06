@@ -136,7 +136,7 @@ void InputFileHandler::parseComponent(Circuit* circuit, const std::string& line)
         
         // Converteer naar component type
         try {
-            Component* component = componentFactory.createComponent(nodeType);
+            Component* component = componentFactory.createComponent(nodeType, nodeId);
             component->setOutputValue(false); // Reset output value
             circuit->addComponent(component);
             std::cout << "Component toegevoegd: " << nodeId << " van type " << nodeType << std::endl;

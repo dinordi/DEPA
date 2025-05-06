@@ -35,12 +35,14 @@ public:
     /**
      * @brief Maak een component door een prototype te klonen
      * @param key De sleutel van het prototype
+     * @param id De unieke ID voor het nieuwe component
      * @return Een pointer naar het nieuw gemaakte component
      */
-    Component* createComponent(const std::string& key) {
+    Component* createComponent(const std::string& key, const std::string& id) {
         auto it = prototypes.find(key);
         if (it != prototypes.end()) {
             Component* cloned = it->second->clone();
+            cloned->setId(id); // Assign the new unique ID
             cloned->setOutputValue(false); // Reset output value
             return cloned;
         }
