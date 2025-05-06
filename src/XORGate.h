@@ -12,6 +12,9 @@ public:
     
     // Implementeert de XOR logica: output = input1 XOR input2 XOR ...
     bool calculateOutput() override;
+
+    // Clone method
+    Component* clone() const override;
 };
 
 // Inline implementaties
@@ -27,6 +30,10 @@ inline bool XORGate::calculateOutput() {
         }
     }
     return result;
+}
+
+inline Component* XORGate::clone() const {
+    return new XORGate(*this);
 }
 
 #endif // XORGATE_H

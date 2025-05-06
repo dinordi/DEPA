@@ -12,6 +12,9 @@ public:
     
     // Implementeert de AND logica: output = input1 AND input2 AND ...
     bool calculateOutput() override;
+
+    // Clone method
+    Component* clone() const override;
 };
 
 // Inline implementaties
@@ -26,6 +29,10 @@ inline bool ANDGate::calculateOutput() {
         }
     }
     return true;
+}
+
+inline Component* ANDGate::clone() const {
+    return new ANDGate(*this);
 }
 
 #endif // ANDGATE_H

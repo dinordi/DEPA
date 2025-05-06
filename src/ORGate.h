@@ -12,6 +12,9 @@ public:
     
     // Implementeert de OR logica: output = input1 OR input2 OR ...
     bool calculateOutput() override;
+
+    // Clone method
+    Component* clone() const override;
 };
 
 // Inline implementaties
@@ -26,6 +29,10 @@ inline bool ORGate::calculateOutput() {
         }
     }
     return false;
+}
+
+inline Component* ORGate::clone() const {
+    return new ORGate(*this);
 }
 
 #endif // ORGATE_H

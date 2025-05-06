@@ -12,6 +12,9 @@ public:
     
     // Implementeert de NOR logica: output = NOT (input1 OR input2 OR ...)
     bool calculateOutput() override;
+
+    // Clone method
+    Component* clone() const override;
 };
 
 // Inline implementaties
@@ -26,6 +29,10 @@ inline bool NORGate::calculateOutput() {
         }
     }
     return true;
+}
+
+inline Component* NORGate::clone() const {
+    return new NORGate(*this);
 }
 
 #endif // NORGATE_H

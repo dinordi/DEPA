@@ -12,6 +12,9 @@ public:
     
     // Implementeert de NOT logica: output = NOT input
     bool calculateOutput() override;
+
+    // Clone method
+    Component* clone() const override;
 };
 
 // Inline implementaties
@@ -24,6 +27,10 @@ inline bool NOTGate::calculateOutput() {
         return false;
     }
     return !inputs[0]->getOutputValue();
+}
+
+inline Component* NOTGate::clone() const {
+    return new NOTGate(*this);
 }
 
 #endif // NOTGATE_H

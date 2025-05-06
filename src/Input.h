@@ -17,6 +17,9 @@ public:
     Type getType() const override { return Type::INPUT; }
     bool isInput() const override { return true; }
     Input* asInput() override { return this; }
+    Component* clone() const override {
+        return new Input(*this);
+    }
     
     // Implementeert de abstracte methode van Component
     bool calculateOutput() override;

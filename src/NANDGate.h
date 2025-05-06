@@ -12,6 +12,8 @@ public:
     
     // Implementeert de NAND logica: output = NOT (input1 AND input2 AND ...)
     bool calculateOutput() override;
+
+    Component* clone() const override;
 };
 
 // Inline implementaties
@@ -26,6 +28,10 @@ inline bool NANDGate::calculateOutput() {
         }
     }
     return false;
+}
+
+inline Component* NANDGate::clone() const {
+    return new NANDGate(*this);
 }
 
 #endif // NANDGATE_H

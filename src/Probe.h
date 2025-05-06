@@ -17,6 +17,7 @@ public:
     Type getType() const override { return Type::PROBE; }
     bool isProbe() const override { return true; }
     Probe* asProbe() override { return this; }
+    Component* clone() const override { return new Probe(*this); }
     
     // Implementeert de abstracte methode van Component
     bool calculateOutput() override;

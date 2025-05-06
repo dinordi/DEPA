@@ -7,11 +7,45 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include <algorithm>
+#include <cctype>
+
+// Functie om whitespace te verwijderen aan begin en einde van een string
+std::string trimWhitespace(const std::string& str) {
+    auto start = std::find_if_not(str.begin(), str.end(), [](unsigned char c) { return std::isspace(c); });
+    auto end = std::find_if_not(str.rbegin(), str.rend(), [](unsigned char c) { return std::isspace(c); }).base();
+    
+    return (start < end ? std::string(start, end) : std::string());
+}
+
+// ComponentFactory instance
+ComponentFactory componentFactory;
+
+
+InputFileHandler::InputFileHandler() {
+    // Initialiseer de prototypes
+    initializePrototypes();
+}
+
+// Methode om prototypes te initialiseren
+void InputFileHandler::initializePrototypes() {
+    componentFactory.registerPrototype("AND", new ANDGate("prototype"));
+    componentFactory.registerPrototype("OR", new ORGate("prototype"));
+    componentFactory.registerPrototype("NOT", new NOTGate("prototype"));
+    componentFactory.registerPrototype("NAND", new NANDGate("prototype"));
+    componentFactory.registerPrototype("NOR", new NORGate("prototype"));
+    componentFactory.registerPrototype("XOR", new XORGate("prototype"));
+    componentFactory.registerPrototype("INPUT", new Input("prototype"));
+    componentFactory.registerPrototype("PROBE", new Probe("prototype"));
+    componentFactory.registerPrototype("INPUT_HIGH", new Input("prototype"));
+    componentFactory.registerPrototype("INPUT_LOW", new Input("prototype"));
+}
 
 // Leest een circuit beschrijving uit een bestand
 Circuit* InputFileHandler::readCircuit(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
+        std::cout << "Kan bestand niet openen: " << filename << std::endl;
         return nullptr;
     }
 
@@ -23,10 +57,60 @@ Circuit* InputFileHandler::readCircuit(const std::string& filename) {
     // Maak een nieuw circuit
     Circuit* circuit = new Circuit();
     
+    // Split de content in regels
+    std::istringstream contentStream(content);
+    std::vector<std::string> lines;
+    std::string line;
+    
+    while (std::getline(contentStream, line)) {
+        // Verwijder commentaar en whitespace
+        size_t commentPos = line.find('#');
+        if (commentPos != std::string::npos) {
+            line = line.substr(0, commentPos);
+        }
+        line = trimWhitespace(line);
+        
+        // Voeg alleen niet-lege regels toe
+        if (!line.empty()) {
+            lines.push_back(line);
+        }
+    }
+    
     // Parse het bestand
     try {
-        parseComponents(circuit, content);
-        parseConnections(circuit, content);
+        // Parseer eerst alle componenten
+        for (const auto& line : lines) {
+            // Check of dit een componentdefinitie is
+            if (line.find("INPUT_HIGH") != std::string::npos || 
+                line.find("INPUT_LOW") != std::string::npos ||
+                line.find("PROBE") != std::string::npos ||
+                (line.find("OR;") != std::string::npos && line.find("XOR;") == std::string::npos) ||
+                line.find("AND;") != std::string::npos ||
+                line.find("NOT;") != std::string::npos ||
+                line.find("NAND;") != std::string::npos ||
+                line.find("NOR;") != std::string::npos ||
+                line.find("XOR;") != std::string::npos) {
+                    parseComponent(circuit, line);
+            }
+        }
+        
+        // Parseer vervolgens alle verbindingen
+        for (const auto& line : lines) {
+            size_t colonPos = line.find(':');
+            size_t semicolonPos = line.find(';');
+            
+            if (colonPos != std::string::npos && semicolonPos != std::string::npos) {
+                // Extraheer de source node ID (voor de dubbele punt)
+                std::string sourceId = trimWhitespace(line.substr(0, colonPos));
+                
+                // Haal de source component op
+                Component* source = circuit->getComponent(sourceId);
+                if (source) {
+                    // Dit is waarschijnlijk een verbindingsdefinitie
+                    parseConnection(circuit, line);
+                }
+            }
+        }
     }
     catch (const std::exception& e) {
         std::cout << "Fout bij het parseren van het circuit: " << e.what() << std::endl;
@@ -38,75 +122,76 @@ Circuit* InputFileHandler::readCircuit(const std::string& filename) {
     return circuit;
 }
 
-// Helper methode om de componenten te parsen uit de bestandsinhoud
-void InputFileHandler::parseComponents(Circuit* circuit, const std::string& content) {
-    // Eenvoudige parselogica voor demonstratie
+// Helper methode om een componentdefinitie te parsen
+void InputFileHandler::parseComponent(Circuit* circuit, const std::string& line) {
+    size_t colonPos = line.find(':');
+    size_t semicolonPos = line.find(';');
     
-    std::istringstream stream(content);
-    std::string line;
-    
-    // Lees het bestand regel voor regel
-    while (std::getline(stream, line)) {
-        if (line.empty() || line[0] == '#') {
-            continue; // Sla lege regels en commentaar over
-        }
+    if (colonPos != std::string::npos && semicolonPos != std::string::npos) {
+        // Extraheer de node ID (voor de dubbele punt)
+        std::string nodeId = trimWhitespace(line.substr(0, colonPos));
         
-        std::istringstream lineStream(line);
-        std::string type, id;
-        int delay = 1; // standaard vertraging
+        // Extraheer het node type (tussen de dubbele punt en de puntkomma)
+        std::string nodeType = trimWhitespace(line.substr(colonPos + 1, semicolonPos - colonPos - 1));
         
-        lineStream >> type >> id;
-        
-        // Gebruik de ComponentFactory om component te maken
+        // Converteer naar component type
         try {
-            if (type == "AND" || type == "OR" || type == "NOT" || 
-                type == "NAND" || type == "NOR" || type == "XOR") {
-                lineStream >> delay; // probeer een vertraging te lezen
-            }
-            
-            Component* component = ComponentFactory::createComponent(type, id, delay);
+            Component* component = componentFactory.createComponent(nodeType);
+            component->setOutputValue(false); // Reset output value
             circuit->addComponent(component);
+            std::cout << "Component toegevoegd: " << nodeId << " van type " << nodeType << std::endl;
         }
         catch (const std::exception& e) {
-            // Ongeldig componenttype, sla over
+            std::cout << "Fout bij het maken van component: " << e.what() << std::endl;
         }
     }
 }
 
-// Helper methode om de verbindingen tussen componenten te parsen
-void InputFileHandler::parseConnections(Circuit* circuit, const std::string& content) {
-    std::istringstream stream(content);
-    std::string line;
+// Helper methode om een verbindingsdefinitie te parsen
+void InputFileHandler::parseConnection(Circuit* circuit, const std::string& line) {
+    size_t colonPos = line.find(':');
+    size_t semicolonPos = line.find(';');
     
-    // Lees het bestand regel voor regel
-    while (std::getline(stream, line)) {
-        if (line.empty() || line[0] == '#' || line.find("CONNECT") == std::string::npos) {
-            continue; // Sla lege regels, commentaar en niet-verbindingsregels over
+    if (colonPos != std::string::npos && semicolonPos != std::string::npos) {
+        // Extraheer de source node ID (voor de dubbele punt)
+        std::string sourceId = trimWhitespace(line.substr(0, colonPos));
+        
+        // Extraheer de target node IDs (tussen de dubbele punt en de puntkomma)
+        std::string targetsStr = trimWhitespace(line.substr(colonPos + 1, semicolonPos - colonPos - 1));
+        
+        // Verkrijg de source component
+        Component* source = circuit->getComponent(sourceId);
+        if (!source) {
+            std::cout << "Source component niet gevonden: " << sourceId << std::endl;
+            return;
         }
         
-        std::istringstream lineStream(line);
-        std::string connect, sourceId, targetId;
+        // Split de target string op komma's
+        std::istringstream targetsStream(targetsStr);
+        std::string targetId;
         
-        lineStream >> connect >> sourceId >> targetId;
-        
-        if (connect == "CONNECT") {
-            Component* source = circuit->getComponent(sourceId);
-            Component* target = circuit->getComponent(targetId);
+        while (std::getline(targetsStream, targetId, ',')) {
+            targetId = trimWhitespace(targetId);
             
-            if (source && target) {
-                circuit->addEdge(new Edge(source, target));
-                
-                // Als het een LogicGate is, voeg de input toe aan de gate
-                if (target->isLogicGate()) {
-                    LogicGate* gate = target->asLogicGate();
-                    gate->addInput(source);
-                }
-                
-                // Als het target een Probe is, laat het de source observeren
-                if (target->isProbe()) {
-                    Probe* probe = target->asProbe();
-                    probe->observeComponent(source);
-                }
+            // Verkrijg de target component
+            Component* target = circuit->getComponent(targetId);
+            if (!target) {
+                std::cout << "Target component niet gevonden: " << targetId << std::endl;
+                continue;
+            }
+            
+            // Maak een nieuwe edge
+            circuit->addEdge(new Edge(source, target));
+            std::cout << "Edge toegevoegd: " << sourceId << " -> " << targetId << std::endl;
+            
+            // Als het target een LogicGate is, voeg de source toe aan zijn inputs
+            if (target->isLogicGate()) {
+                target->asLogicGate()->addInput(source);
+            }
+            
+            // Als het target een Probe is, laat het de source observeren
+            if (target->isProbe()) {
+                target->asProbe()->observeComponent(source);
             }
         }
     }

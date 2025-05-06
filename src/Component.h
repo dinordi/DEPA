@@ -38,6 +38,12 @@ public:
     virtual bool calculateOutput() = 0;
     
     /**
+     * @brief Clone this component (Prototype pattern)
+     * @return A new instance of the component
+     */
+    virtual Component* clone() const = 0;
+
+    /**
      * @brief Geeft het type van deze component terug
      * @return Het componenttype
      */
