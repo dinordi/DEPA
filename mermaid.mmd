@@ -18,12 +18,14 @@ classDiagram
         +int propagationDelay
         +bool outputValue
         +calculateOutput()* bool
+        +clone()* Component  // Toegevoegd voor Prototype pattern
     }
 
     class LogicGate {
         <<abstract>>
         "Abstract basis voor logic gates"
         +calculateOutput() bool
+        // clone() wordt geërfd en geïmplementeerd door concrete gates
     }
 
     class Input {
@@ -31,6 +33,7 @@ classDiagram
         "Externe input bron voor het circuit"
         +setValue(bool value)
         +calculateOutput() bool
+        +clone() Component // Implementeert clone
     }
 
     class Probe {
@@ -39,14 +42,33 @@ classDiagram
         +bool recordedValue
         +recordValue(bool value)
         +calculateOutput() bool
+        +clone() Component // Implementeert clone
     }
 
-    class ANDGate { "Implementeerd AND logic" }
-    class ORGate { "Implementeerd OR logic" }
-    class NOTGate { "Implementeerd NOT logic" }
-    class NANDGate { "Implementeerd NAND logic" }
-    class NORGate { "Implementeerd NOR logic" }
-    class XORGate { "Implementeerd XOR logic" }
+    class ANDGate {
+        "Implementeerd AND logic"
+        +clone() Component // Implementeert clone
+    }
+    class ORGate {
+        "Implementeerd OR logic"
+        +clone() Component // Implementeert clone
+    }
+    class NOTGate {
+        "Implementeerd NOT logic"
+        +clone() Component // Implementeert clone
+    }
+    class NANDGate {
+        "Implementeerd NAND logic"
+        +clone() Component // Implementeert clone
+    }
+    class NORGate {
+        "Implementeerd NOR logic"
+        +clone() Component // Implementeert clone
+    }
+    class XORGate {
+        "Implementeerd XOR logic"
+        +clone() Component // Implementeert clone
+    }
 
     class Edge {
         <<Connection>>
@@ -64,9 +86,18 @@ classDiagram
         +simulate()
     }
 
+    class ComponentFactory {
+        <<Prototype Factory>>
+        "Creëert componenten door prototypes te klonen en te initialiseren"
+        -Map<string, Component> prototypes
+        +registerPrototype(string key, Component prototype)
+        +createComponent(string key, string id, int propagationDelay) Component
+    }
+
     class InputFileHandler {
         <<File Parser>>
         "Leest circuit definities uit een bestand"
+        -ComponentFactory componentFactory // Afhankelijkheid van factory
         +readCircuit(string filename) Circuit
     }
 
@@ -96,6 +127,10 @@ classDiagram
     Simulator "1" -- "1" Circuit : simuleert
     Simulator "1" -- "1" InputFileHandler : gebruikt
     Simulator "1" -- "1" OutputHandler : gebruikt
+    Simulator "1" -- "1" ComponentFactory : initialiseert/gebruikt (optioneel, voor registratie prototypes)
 
+
+    InputFileHandler "1" -- "1" ComponentFactory : gebruikt
     InputFileHandler "1" -- "1" Circuit : creëert
     OutputHandler "1" -- "*" Probe : rapporteert over
+    ComponentFactory ..> Component : creëert (via clone)
