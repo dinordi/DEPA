@@ -28,6 +28,9 @@ public:
     
     // Start de simulatie
     void simulate(int timeSteps);
+
+    // Display probe outputs for all clock cycles
+    void displaySimulationResults(int timeSteps);
     
 private:
     // Event voor de simulatie: component + tijdstip
@@ -152,7 +155,20 @@ inline void Simulator::simulate(int timeSteps) {
     // Schrijf resultaten als er een OutputHandler is
     if (outputHandler) {
         std::vector<Probe*> probes = collectProbes();
-        outputHandler->writeResults(probes);
+        // outputHandler->writeResults(probes);
+        displaySimulationResults(timeSteps);
+    }
+}
+
+inline void Simulator::displaySimulationResults(int timeSteps) {
+    std::vector<Probe*> probes = collectProbes();
+    for (int t = 0; t <= timeSteps; ++t) {
+        std::cout << "Time step " << t << ":\n";
+        for (Probe* probe : probes) {
+            std::cout << "Probe " << probe->getId() << ": "
+                      << (probe->getOutputValue() ? "HIGH" : "LOW") << "\n";
+        }
+        std::cout << "===================\n";
     }
 }
 

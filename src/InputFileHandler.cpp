@@ -78,9 +78,8 @@ Circuit* InputFileHandler::readCircuit(const std::string& filename) {
     
     // Parse het bestand
     try {
-        // Parseer eerst alle componenten
+        // Ensure all components are added to the circuit before parsing connections
         for (const auto& line : lines) {
-            // Check of dit een componentdefinitie is
             if (line.find("INPUT_HIGH") != std::string::npos || 
                 line.find("INPUT_LOW") != std::string::npos ||
                 line.find("PROBE") != std::string::npos ||
