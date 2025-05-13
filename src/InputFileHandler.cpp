@@ -79,7 +79,8 @@ Circuit* InputFileHandler::readCircuit(const std::string& filename) {
     // Parse het bestand
     try {
         // Ensure all components are added to the circuit before parsing connections
-        for (const auto& line : lines) {
+        for (auto it = lines.begin(); it != lines.end();) {
+            const std::string& line = *it;
             if (line.find("INPUT_HIGH") != std::string::npos || 
                 line.find("INPUT_LOW") != std::string::npos ||
                 line.find("PROBE") != std::string::npos ||
@@ -88,16 +89,22 @@ Circuit* InputFileHandler::readCircuit(const std::string& filename) {
                 line.find("NOT;") != std::string::npos ||
                 line.find("NAND;") != std::string::npos ||
                 line.find("NOR;") != std::string::npos ||
-                line.find("XOR;") != std::string::npos) {
-                    parseComponent(circuit, line);
+                line.find("XOR;") != std::string::npos) 
+            {
+                parseComponent(circuit, line);
+                // Remove the component from the lines vector to avoid re-parsing
+                // std::cout << "Component geparsed: " << line << std::endl;
+                it = lines.erase(it);
+            } else {
+                ++it;
             }
         }
-        
+        std::cout << "Componenten geparsed, nu verbindingen. Grootte lines: " << lines.size() << std::endl;
         // Parseer vervolgens alle verbindingen
-        for (const auto& line : lines) {
+        for (auto it = lines.begin(); it != lines.end();) {
+            const std::string& line = *it;
             size_t colonPos = line.find(':');
             size_t semicolonPos = line.find(';');
-            
             if (colonPos != std::string::npos && semicolonPos != std::string::npos) {
                 // Extraheer de source node ID (voor de dubbele punt)
                 std::string sourceId = trimWhitespace(line.substr(0, colonPos));
@@ -107,6 +114,10 @@ Circuit* InputFileHandler::readCircuit(const std::string& filename) {
                 if (source) {
                     // Dit is waarschijnlijk een verbindingsdefinitie
                     parseConnection(circuit, line);
+                    // Verwijder de verbinding uit de regels vector
+                    it = lines.erase(it);
+                } else {
+                    ++it;
                 }
             }
         }
@@ -136,7 +147,13 @@ void InputFileHandler::parseComponent(Circuit* circuit, const std::string& line)
         // Converteer naar component type
         try {
             Component* component = componentFactory.createComponent(nodeType, nodeId);
-            component->setOutputValue(false); // Reset output value
+
+            if (nodeType == "INPUT_HIGH") {
+                component->setOutputValue(true);
+            } else if (nodeType == "INPUT_LOW") {
+                component->setOutputValue(false);
+            }
+
             circuit->addComponent(component);
             std::cout << "Component toegevoegd: " << nodeId << " van type " << nodeType << std::endl;
         }

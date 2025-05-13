@@ -5,6 +5,7 @@
 #include "InputFileHandler.h"
 #include "OutputHandler.h"
 #include "Probe.h"
+#include "Input.h"
 #include <vector>
 #include <queue>
 #include <functional>
@@ -162,12 +163,30 @@ inline void Simulator::simulate(int timeSteps) {
 
 inline void Simulator::displaySimulationResults(int timeSteps) {
     std::vector<Probe*> probes = collectProbes();
+    std::vector<Input*> inputs;
+
+    // Collect all inputs in the circuit
+    for (Component* component : circuit->getComponents()) {
+        if (component->isInput()) {
+            inputs.push_back(component->asInput());
+        }
+    }
+
     for (int t = 0; t <= timeSteps; ++t) {
         std::cout << "Time step " << t << ":\n";
+
+        // Display input values
+        for (Input* input : inputs) {
+            std::cout << "Input " << input->getId() << ": "
+                      << (input->getOutputValue() ? "HIGH" : "LOW") << "\n";
+        }
+
+        // Display probe values
         for (Probe* probe : probes) {
             std::cout << "Probe " << probe->getId() << ": "
-                      << (probe->getOutputValue() ? "HIGH" : "LOW") << "\n";
+                      << (probe->getRecordedValue() ? "HIGH" : "LOW") << "\n";
         }
+
         std::cout << "===================\n";
     }
 }
