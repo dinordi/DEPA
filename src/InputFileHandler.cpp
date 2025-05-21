@@ -152,7 +152,10 @@ void InputFileHandler::parseComponent(Circuit* circuit, const std::string& line)
                 component->setOutputValue(true);
             } else if (nodeType == "INPUT_LOW") {
                 component->setOutputValue(false);
-            }
+            } 
+            // else {
+            //     component->setOutputValue(false);
+            // }
 
             circuit->addComponent(component);
             std::cout << "Component toegevoegd: " << nodeId << " van type " << nodeType << std::endl;

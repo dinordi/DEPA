@@ -29,6 +29,7 @@ public:
     
     // Start de simulatie
     void simulate(int timeSteps);
+    void processEventsAtTimeStep(int currentStep);
 
     // Display probe outputs for all clock cycles
     void displaySimulationResults(int timeSteps);
@@ -117,12 +118,20 @@ inline void Simulator::simulate(int timeSteps) {
     
     // Zet alle events in de queue voor t=0
     for (Component* component : circuit->getComponents()) {
-        eventQueue.push({component, 0});
+        if (component->isInput()) {
+            eventQueue.push({component, 0});
+        }
+        else
+        {
+            component->setOutputValue(false); // Initialiseer niet-ingestelde componenten
+        }
     }
     
     // Verwerk events tot aan timeSteps
     int currentTime = 0;
+    int steps = 0;
     while (!eventQueue.empty() && currentTime <= timeSteps) {
+        steps++;
         // Haal het volgende event op
         Event event = eventQueue.top();
         eventQueue.pop();
@@ -138,7 +147,7 @@ inline void Simulator::simulate(int timeSteps) {
         bool newValue = event.component->calculateOutput();
         
         // Als de waarde is veranderd, update en plan nieuwe events voor verbonden componenten
-        if (newValue != oldValue) {
+        if (newValue != oldValue || event.component->isInput()) {
             event.component->setOutputValue(newValue);
             
             // Vind alle edges die deze component als source hebben
@@ -151,14 +160,14 @@ inline void Simulator::simulate(int timeSteps) {
                 }
             }
         }
-    }
-    
     // Schrijf resultaten als er een OutputHandler is
     if (outputHandler) {
         std::vector<Probe*> probes = collectProbes();
         // outputHandler->writeResults(probes);
-        displaySimulationResults(timeSteps);
+        displaySimulationResults(steps);
     }
+    }
+    
 }
 
 inline void Simulator::displaySimulationResults(int timeSteps) {
@@ -172,23 +181,22 @@ inline void Simulator::displaySimulationResults(int timeSteps) {
         }
     }
 
-    for (int t = 0; t <= timeSteps; ++t) {
-        std::cout << "Time step " << t << ":\n";
+    std::cout << "Time step " << timeSteps << ":\n";
 
-        // Display input values
-        for (Input* input : inputs) {
-            std::cout << "Input " << input->getId() << ": "
-                      << (input->getOutputValue() ? "HIGH" : "LOW") << "\n";
-        }
-
-        // Display probe values
-        for (Probe* probe : probes) {
-            std::cout << "Probe " << probe->getId() << ": "
-                      << (probe->getRecordedValue() ? "HIGH" : "LOW") << "\n";
-        }
-
-        std::cout << "===================\n";
+    // Display input values
+    for (Input* input : inputs) {
+        std::cout << "Input " << input->getId() << ": "
+                    << (input->getOutputValue() ? "HIGH" : "LOW") << "\n";
     }
+
+    // Display probe values
+    for (Probe* probe : probes) {
+        std::cout << "Probe " << probe->getId() << ": "
+                    << (probe->getRecordedValue() ? "HIGH" : "LOW") << "\n";
+    }
+
+    std::cout << "===================\n";
+
 }
 
 #endif // SIMULATOR_H
