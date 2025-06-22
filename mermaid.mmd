@@ -2,113 +2,141 @@ classDiagram
     direction LR
 
     class Circuit {
-        <<Circuit>>
-        "Representeerd het gehele digitale circuit"
-        +List<Component> components
-        +List<Edge> edges
-        +addComponent(Component c)
-        +addEdge(Edge e)
-        +getComponent(string id) Component
+        +addComponent(Component* component)
+        +Component* getComponent(string id)
+        +vector~Component*~& getComponents()
+        +addEdge(Edge* edge)
+        +vector~Edge*~& getEdges()
     }
 
     class Component {
         <<abstract>>
-        "Abstracte basis voor alle circuit elementen"
         +string id
         +int propagationDelay
         +bool outputValue
-        +calculateOutput()* bool
-        +clone()* Component  // Toegevoegd voor Prototype pattern
+        +setId(string newId)
+        +int getPropagationDelay()
+        +bool getOutputValue()
+        +void setOutputValue(bool value)
+        +virtual bool calculateOutput()
+        +virtual Component* clone()
+        +virtual Type getType()
+        +virtual bool isLogicGate()
+        +virtual bool isProbe()
+        +virtual bool isInput()
+        +virtual LogicGate* asLogicGate()
+        +virtual Probe* asProbe()
+        +virtual Input* asInput()
+        +addObserver(ComponentObserver* observer)
+        +removeObserver(ComponentObserver* observer)
+        +notifyObservers()
+    }
+
+    class ComponentObserver {
+        <<interface>>
+        +void update(Component* subject)
     }
 
     class LogicGate {
         <<abstract>>
-        "Abstract basis voor logic gates"
-        +calculateOutput() bool
-        // clone() wordt geërfd en geïmplementeerd door concrete gates
+        +addInput(Component* input)
+        +Component* getInput(int index)
+        +int getInputCount()
+        +vector~Component*~ inputs
+        +override bool calculateOutput()
+        +override Component* clone()
+        +override Type getType()
+        +override bool isLogicGate()
+        +override LogicGate* asLogicGate()
     }
 
     class Input {
-        <<Input Source>>
-        "Externe input bron voor het circuit"
         +setValue(bool value)
-        +calculateOutput() bool
-        +clone() Component // Implementeert clone
+        +override bool calculateOutput()
+        +override Component* clone()
+        +override Type getType()
+        +override bool isInput()
+        +override Input* asInput()
     }
 
     class Probe {
-        <<Measurement Point>>
-        "Luistert signaal value op een bepaald punt"
         +bool recordedValue
-        +recordValue(bool value)
-        +calculateOutput() bool
-        +clone() Component // Implementeert clone
+        +bool getRecordedValue()
+        +override bool calculateOutput()
+        +override Component* clone()
+        +override Type getType()
+        +override bool isProbe()
+        +override Probe* asProbe()
+        +void update(Component* subject)
+        +void observeComponent(Component* component)
     }
 
     class ANDGate {
-        "Implementeerd AND logic"
-        +clone() Component // Implementeert clone
+        +override bool calculateOutput()
+        +override Component* clone()
     }
     class ORGate {
-        "Implementeerd OR logic"
-        +clone() Component // Implementeert clone
+        +override bool calculateOutput()
+        +override Component* clone()
     }
     class NOTGate {
-        "Implementeerd NOT logic"
-        +clone() Component // Implementeert clone
+        +override bool calculateOutput()
+        +override Component* clone()
     }
     class NANDGate {
-        "Implementeerd NAND logic"
-        +clone() Component // Implementeert clone
+        +override bool calculateOutput()
+        +override Component* clone()
     }
     class NORGate {
-        "Implementeerd NOR logic"
-        +clone() Component // Implementeert clone
+        +override bool calculateOutput()
+        +override Component* clone()
     }
     class XORGate {
-        "Implementeerd XOR logic"
-        +clone() Component // Implementeert clone
+        +override bool calculateOutput()
+        +override Component* clone()
     }
 
     class Edge {
-        <<Connection>>
-        "Representeerd een verbinding tussen componenten"
-        +Component source
-        +Component target
+        +Component* getSource()
+        +Component* getTarget()
+        -Component* source
+        -Component* target
     }
 
     class Simulator {
-        <<Simulation Engine>>
-        "Beheert de simulatie"
-        +Circuit circuit
-        +InputFileHandler inputFileHandler
-        +OutputHandler outputHandler
-        +simulate()
+        +Simulator(Circuit* circuit = nullptr)
+        +void setCircuit(Circuit* circuit)
+        +Circuit* getCircuit()
+        +void setInputFileHandler(InputFileHandler* handler)
+        +void setOutputHandler(OutputHandler* handler)
+        +bool loadCircuit(string filename)
+        +void simulate(int timeSteps)
+        +void displaySimulationResults(int timeSteps)
     }
 
     class ComponentFactory {
-        <<Prototype Factory>>
-        "Creëert componenten door prototypes te klonen en te initialiseren"
-        -Map<string, Component> prototypes
-        +registerPrototype(string key, Component prototype)
-        +createComponent(string key, string id, int propagationDelay) Component
+        +registerPrototype(string key, Component* prototype)
+        +Component* createComponent(string key, string id)
+        -unordered_map~string, Component*~ prototypes
     }
 
     class InputFileHandler {
-        <<File Parser>>
-        "Leest circuit definities uit een bestand"
-        -ComponentFactory componentFactory // Afhankelijkheid van factory
-        +readCircuit(string filename) Circuit
+        +InputFileHandler()
+        +Circuit* readCircuit(string filename)
+        +void initializePrototypes()
+        -void parseComponent(Circuit* circuit, string line)
+        -void parseConnection(Circuit* circuit, string line)
     }
 
     class OutputHandler {
-        <<Result Writer>>
-        "Schrijft de resultaten naar een bestand of console"
-        +writeResults(List<Probe> probes)
+        +OutputHandler(ostream& output = cout)
+        +OutputHandler(string filename)
+        +~OutputHandler()
+        +void writeResults(vector~Probe*~ probes)
     }
 
-    Circuit "1" *-- "*" Component : bevat
-    Circuit "1" *-- "*" Edge : bevat
+    Circuit "1" *-- "*" Component : contains
+    Circuit "1" *-- "*" Edge : contains
 
     Component <|-- LogicGate
     Component <|-- Input
@@ -124,13 +152,14 @@ classDiagram
     Edge "1" -- "1" Component : source
     Edge "1" -- "1" Component : target
 
-    Simulator "1" -- "1" Circuit : simuleert
-    Simulator "1" -- "1" InputFileHandler : gebruikt
-    Simulator "1" -- "1" OutputHandler : gebruikt
-    Simulator "1" -- "1" ComponentFactory : initialiseert/gebruikt (optioneel, voor registratie prototypes)
+    Probe ..|> ComponentObserver
 
+    Simulator "1" -- "1" Circuit : simulates
+    Simulator "1" -- "1" InputFileHandler : uses
+    Simulator "1" -- "1" OutputHandler : uses
 
-    InputFileHandler "1" -- "1" ComponentFactory : gebruikt
-    InputFileHandler "1" -- "1" Circuit : creëert
-    OutputHandler "1" -- "*" Probe : rapporteert over
-    ComponentFactory ..> Component : creëert (via clone)
+    InputFileHandler "1" -- "1" ComponentFactory : uses
+    InputFileHandler "1" -- "1" Circuit : creates
+    OutputHandler "1" -- "*" Probe : reports
+
+    ComponentFactory ..> Component : creates (via clone)

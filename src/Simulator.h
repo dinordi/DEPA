@@ -101,7 +101,6 @@ inline std::vector<Probe*> Simulator::collectProbes() {
         return probes;
     }
     
-    // Gebruik polymorfisme in plaats van dynamic_cast
     for (Component* component : circuit->getComponents()) {
         if (component->isProbe()) {
             probes.push_back(component->asProbe());
