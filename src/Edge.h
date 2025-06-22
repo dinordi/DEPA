@@ -19,16 +19,4 @@ private:
     Component* target; // Doelcomponent (input)
 };
 
-// Inline implementaties
-inline Edge::Edge(Component* source, Component* target) 
-    : source(source), target(target) {}
-
-inline Component* Edge::getSource() const {
-    return source;
-}
-
-inline Component* Edge::getTarget() const {
-    return target;
-}
-
 #endif // EDGE_H

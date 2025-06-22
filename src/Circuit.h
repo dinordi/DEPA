@@ -16,12 +16,10 @@ public:
     Circuit() = default;
     ~Circuit();
     
-    // Componenten beheer
     void addComponent(Component* component);
     Component* getComponent(const std::string& id);
     std::vector<Component*>& getComponents();
     
-    // Verbindingen beheer
     void addEdge(Edge* edge);
     std::vector<Edge*>& getEdges();
 

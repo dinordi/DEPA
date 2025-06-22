@@ -28,9 +28,7 @@ public:
      * @param key De sleutel om het prototype te identificeren
      * @param prototype Een pointer naar het prototype component
      */
-    void registerPrototype(const std::string& key, Component* prototype) {
-        prototypes[key] = prototype;
-    }
+    void registerPrototype(const std::string& key, Component* prototype);
 
     /**
      * @brief Maak een component door een prototype te klonen
@@ -38,16 +36,7 @@ public:
      * @param id De unieke ID voor het nieuwe component
      * @return Een pointer naar het nieuw gemaakte component
      */
-    Component* createComponent(const std::string& key, const std::string& id) {
-        auto it = prototypes.find(key);
-        if (it != prototypes.end()) {
-            Component* cloned = it->second->clone();
-            cloned->setId(id); // Assign the new unique ID
-            cloned->setOutputValue(false); // Reset output value
-            return cloned;
-        }
-        throw std::invalid_argument("Prototype not found for key: " + key);
-    }
+    Component* createComponent(const std::string& key, const std::string& id);
 
 private:
     std::unordered_map<std::string, Component*> prototypes; // Prototype opslag
