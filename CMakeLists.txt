@@ -15,6 +15,19 @@ add_executable(CircuitSimulator
     src/main.cpp
     src/Circuit.cpp
     src/InputFileHandler.cpp
+    src/ANDGate.cpp
+    src/ORGate.cpp
+    src/NOTGate.cpp
+    src/NANDGate.cpp
+    src/NORGate.cpp
+    src/XORGate.cpp
+    src/Input.cpp
+    src/Probe.cpp
+    src/Edge.cpp
+    src/LogicGate.cpp
+    src/ComponentFactory.cpp
+    src/OutputHandler.cpp
+    src/Simulator.cpp
 )
 
 # Controleer of we op Apple platform draaien
