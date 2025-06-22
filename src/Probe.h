@@ -33,42 +33,4 @@ private:
     Component* observedComponent; // Component die deze probe observeert
 };
 
-// Inline implementaties
-inline Probe::Probe(const std::string& id)
-    : Component(id, 10), recordedValue(false), observedComponent(nullptr) {}
-
-inline Probe::~Probe() {
-    if (observedComponent) {
-        observedComponent->removeObserver(this);
-    }
-}
-
-inline bool Probe::getRecordedValue() const {
-    return recordedValue;
-}
-
-inline void Probe::update(Component* subject) {
-    if (subject == observedComponent) {
-        recordedValue = subject->getOutputValue();
-    }
-}
-
-inline void Probe::observeComponent(Component* component) {
-    // Verwijder bestaande observatie, indien aanwezig
-    if (observedComponent) {
-        observedComponent->removeObserver(this);
-    }
-    
-    // Registreer nieuwe observatie
-    observedComponent = component;
-    if (component) {
-        component->addObserver(this);
-    }
-}
-
-inline bool Probe::calculateOutput() {
-    // Probe geeft de geobserveerde waarde terug
-    return recordedValue;
-}
-
 #endif // PROBE_H

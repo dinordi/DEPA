@@ -17,22 +17,4 @@ public:
     Component* clone() const override;
 };
 
-// Inline implementaties
-inline NORGate::NORGate(const std::string& id, int propagationDelay)
-    : LogicGate(id, 2, propagationDelay) {}
-
-inline bool NORGate::calculateOutput() {
-    // NOR is de inverse van OR: returneer true alleen als ALLE inputs false zijn
-    for (Component* input : inputs) {
-        if (input->getOutputValue()) {
-            return false;
-        }
-    }
-    return true;
-}
-
-inline Component* NORGate::clone() const {
-    return new NORGate(*this);
-}
-
 #endif // NORGATE_H

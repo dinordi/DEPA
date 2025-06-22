@@ -18,20 +18,4 @@ public:
     Component* clone() const override;
 };
 
-// Inline implementaties
-inline NOTGate::NOTGate(const std::string& id, int propagationDelay)
-    : LogicGate(id, 1, propagationDelay) {}
-
-inline bool NOTGate::calculateOutput() {
-    // NOT inverteert de input waarde - hier gebruiken we alleen de eerste input
-    if (inputs.empty()) {
-        return false;
-    }
-    return !inputs[0]->getOutputValue();
-}
-
-inline Component* NOTGate::clone() const {
-    return new NOTGate(*this);
-}
-
 #endif // NOTGATE_H

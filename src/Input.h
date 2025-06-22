@@ -25,17 +25,4 @@ public:
     bool calculateOutput() override;
 };
 
-// Inline implementaties
-inline Input::Input(const std::string& id)
-    : Component(id, 0) {} // Input heeft geen vertraging
-
-inline void Input::setValue(bool value) {
-    setOutputValue(value);
-}
-
-inline bool Input::calculateOutput() {
-    // Input berekent niet, geeft gewoon de ingestelde waarde terug
-    return getOutputValue();
-}
-
 #endif // INPUT_H

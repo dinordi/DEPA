@@ -18,22 +18,4 @@ public:
     Component* clone() const override;
 };
 
-// Inline implementaties
-inline ANDGate::ANDGate(const std::string& id, int propagationDelay)
-    : LogicGate(id, 2, propagationDelay) {}
-
-inline bool ANDGate::calculateOutput() {
-    // AND geeft alleen true als ALLE inputs true zijn
-    for (Component* input : inputs) {
-        if (!input->getOutputValue()) {
-            return false;
-        }
-    }
-    return true;
-}
-
-inline Component* ANDGate::clone() const {
-    return new ANDGate(*this);
-}
-
 #endif // ANDGATE_H
