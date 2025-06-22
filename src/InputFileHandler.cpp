@@ -152,7 +152,9 @@ void InputFileHandler::parseComponent(Circuit* circuit, const std::string& line)
                 component->setOutputValue(true);
             } else if (nodeType == "INPUT_LOW") {
                 component->setOutputValue(false);
-            } 
+            } else if (nodeType == "NOT") {
+                component->setOutputValue(true); // NOT gate output is initially true
+            }
             // else {
             //     component->setOutputValue(false);
             // }

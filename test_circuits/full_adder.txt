@@ -6,7 +6,7 @@
 #
 A: INPUT_HIGH;
 B: INPUT_HIGH;
-Cin: INPUT_LOW;
+Cin: INPUT_HIGH;
 Cout: PROBE;
 Sum: PROBE;
 NODE1: OR;

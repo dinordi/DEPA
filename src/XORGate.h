@@ -8,7 +8,7 @@
  */
 class XORGate : public LogicGate {
 public:
-    XORGate(const std::string& id, int propagationDelay = 1);
+    XORGate(const std::string& id, int propagationDelay = 10);
     
     // Implementeert de XOR logica: output = input1 XOR input2 XOR ...
     bool calculateOutput() override;

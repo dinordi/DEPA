@@ -8,7 +8,7 @@
  */
 class ORGate : public LogicGate {
 public:
-    ORGate(const std::string& id, int propagationDelay = 1);
+    ORGate(const std::string& id, int propagationDelay = 10);
     
     // Implementeert de OR logica: output = input1 OR input2 OR ...
     bool calculateOutput() override;

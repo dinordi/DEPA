@@ -12,13 +12,14 @@ int main(int argc, char* argv[]) {
     std::cout << "=================" << std::endl;
     
     // Controleer of het bestandspad als argument is meegegeven
-    if (argc < 2) {
-        std::cout << "Gebruik: " << argv[0] << " <pad_naar_circuit_bestand>" << std::endl;
-        std::cout << "Bijvoorbeeld: " << argv[0] << " test_circuits/full_adder.txt" << std::endl;
+    if (argc < 3) {
+        std::cout << "Gebruik: " << argv[0] << " <pad_naar_circuit_bestand> <timesteps (ns)>" << std::endl;
+        std::cout << "Bijvoorbeeld: " << argv[0] << " test_circuits/full_adder.txt 50" << std::endl;
         return 1;
     }
     
     std::string circuitFilePath = argv[1];
+    int timeSteps = std::stoi(argv[2]);
     std::cout << "Circuit bestand: " << circuitFilePath << std::endl;
     
     // Maak de input handler en simulator
@@ -40,7 +41,7 @@ int main(int argc, char* argv[]) {
     
     // Simuleer het circuit voor een aantal tijdstappen
     std::cout << "\nStart simulatie..." << std::endl;
-    simulator.simulate(10); // Simuleer voor 10 tijdstappen
+    simulator.simulate(timeSteps); // Simuleer voor 10 tijdstappen
     
     // Het circuit wordt automatisch opgeruimd door de simulator destructor
     std::cout << "\nSimulatie voltooid." << std::endl;

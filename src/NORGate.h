@@ -8,7 +8,7 @@
  */
 class NORGate : public LogicGate {
 public:
-    NORGate(const std::string& id, int propagationDelay = 1);
+    NORGate(const std::string& id, int propagationDelay = 10);
     
     // Implementeert de NOR logica: output = NOT (input1 OR input2 OR ...)
     bool calculateOutput() override;

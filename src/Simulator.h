@@ -115,59 +115,48 @@ inline void Simulator::simulate(int timeSteps) {
     if (!circuit) {
         return;
     }
-    
+
     // Zet alle events in de queue voor t=0
     for (Component* component : circuit->getComponents()) {
         if (component->isInput()) {
             eventQueue.push({component, 0});
-        }
-        else
-        {
+        } else {
             component->setOutputValue(false); // Initialiseer niet-ingestelde componenten
         }
     }
-    
-    // Verwerk events tot aan timeSteps
+
     int currentTime = 0;
-    int steps = 0;
-    while (!eventQueue.empty() && currentTime <= timeSteps) {
-        steps++;
-        // Haal het volgende event op
-        Event event = eventQueue.top();
-        eventQueue.pop();
-        
-        // Update de huidige tijd
-        currentTime = event.time;
-        if (currentTime > timeSteps) {
-            break;
+    while (currentTime <= timeSteps) {        
+        // Verzamel alle events voor de huidige tijd
+        std::vector<Event> eventsThisStep;
+        while (!eventQueue.empty() && eventQueue.top().time == currentTime) {
+            eventsThisStep.push_back(eventQueue.top());
+            eventQueue.pop();
         }
         
-        // Bereken de nieuwe output
-        bool oldValue = event.component->getOutputValue();
-        bool newValue = event.component->calculateOutput();
-        
-        // Als de waarde is veranderd, update en plan nieuwe events voor verbonden componenten
-        if (newValue != oldValue || event.component->isInput()) {
+        // Verwerk alle events voor deze tijdstap
+        for (const Event& event : eventsThisStep) {
+            bool oldValue = event.component->getOutputValue();
+            bool newValue = event.component->calculateOutput();
+
             event.component->setOutputValue(newValue);
-            
-            // Vind alle edges die deze component als source hebben
+            // Plan nieuwe events voor verbonden componenten
             for (Edge* edge : circuit->getEdges()) {
                 if (edge->getSource() == event.component) {
-                    // Plan een nieuw event voor de target component
                     Component* target = edge->getTarget();
                     int delay = target->getPropagationDelay();
                     eventQueue.push({target, currentTime + delay});
                 }
             }
         }
-    // Schrijf resultaten als er een OutputHandler is
-    if (outputHandler) {
-        std::vector<Probe*> probes = collectProbes();
-        // outputHandler->writeResults(probes);
-        displaySimulationResults(steps);
+
+        // Toon resultaten voor deze tijdstap
+        if (outputHandler) {
+            displaySimulationResults(currentTime);
+        }
+
+        currentTime++;
     }
-    }
-    
 }
 
 inline void Simulator::displaySimulationResults(int timeSteps) {

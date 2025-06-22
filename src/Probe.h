@@ -35,7 +35,7 @@ private:
 
 // Inline implementaties
 inline Probe::Probe(const std::string& id)
-    : Component(id, 0), recordedValue(false), observedComponent(nullptr) {}
+    : Component(id, 10), recordedValue(false), observedComponent(nullptr) {}
 
 inline Probe::~Probe() {
     if (observedComponent) {

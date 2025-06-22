@@ -8,7 +8,7 @@
  */
 class NANDGate : public LogicGate {
 public:
-    NANDGate(const std::string& id, int propagationDelay = 1);
+    NANDGate(const std::string& id, int propagationDelay = 10);
     
     // Implementeert de NAND logica: output = NOT (input1 AND input2 AND ...)
     bool calculateOutput() override;

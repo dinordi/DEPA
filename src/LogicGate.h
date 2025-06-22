@@ -10,7 +10,7 @@
  */
 class LogicGate : public Component {
 public:
-    LogicGate(const std::string& id, int inputCount, int propagationDelay = 1);
+    LogicGate(const std::string& id, int inputCount, int propagationDelay = 10);
     virtual ~LogicGate() = default;
     
     void addInput(Component* input);
