@@ -115,6 +115,8 @@ classDiagram
     }
 
     class ComponentFactory {
+        <<singleton>>
+        +static getInstance()
         +registerPrototype(string key, Component* prototype)
         +Component* createComponent(string key, string id)
         -unordered_map~string, Component*~ prototypes
@@ -162,4 +164,10 @@ classDiagram
     InputFileHandler "1" -- "1" Circuit : creates
     OutputHandler "1" -- "*" Probe : reports
 
-    ComponentFactory ..> Component : creates (via clone)
+    %% Prototype Pattern: ComponentFactory creates Components via clone()
+    ComponentFactory ..> Component : <<prototype>>\ncreates via clone()
+
+    %% Singleton note
+    note for ComponentFactory "Singleton Pattern: Use getInstance() for global access"
+    note for ComponentFactory "Prototype Pattern: Low binding via clone()"
+    end
