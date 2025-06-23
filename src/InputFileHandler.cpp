@@ -18,10 +18,6 @@ std::string trimWhitespace(const std::string& str) {
     return (start < end ? std::string(start, end) : std::string());
 }
 
-// ComponentFactory instance
-ComponentFactory componentFactory;
-
-
 InputFileHandler::InputFileHandler() {
     // Initialiseer de prototypes
     initializePrototypes();
@@ -29,16 +25,6 @@ InputFileHandler::InputFileHandler() {
 
 // Methode om prototypes te initialiseren
 void InputFileHandler::initializePrototypes() {
-    componentFactory.registerPrototype("AND", new ANDGate("prototype"));
-    componentFactory.registerPrototype("OR", new ORGate("prototype"));
-    componentFactory.registerPrototype("NOT", new NOTGate("prototype"));
-    componentFactory.registerPrototype("NAND", new NANDGate("prototype"));
-    componentFactory.registerPrototype("NOR", new NORGate("prototype"));
-    componentFactory.registerPrototype("XOR", new XORGate("prototype"));
-    componentFactory.registerPrototype("INPUT", new Input("prototype"));
-    componentFactory.registerPrototype("PROBE", new Probe("prototype"));
-    componentFactory.registerPrototype("INPUT_HIGH", new Input("prototype"));
-    componentFactory.registerPrototype("INPUT_LOW", new Input("prototype"));
 }
 
 // Leest een circuit beschrijving uit een bestand
@@ -146,7 +132,7 @@ void InputFileHandler::parseComponent(Circuit* circuit, const std::string& line)
         
         // Converteer naar component type
         try {
-            Component* component = componentFactory.createComponent(nodeType, nodeId);
+            Component* component = ComponentFactory::getInstance().createComponent(nodeType, nodeId);
 
             if (nodeType == "INPUT_HIGH") {
                 component->setOutputValue(true);

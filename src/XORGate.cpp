@@ -1,4 +1,14 @@
 #include "XORGate.h"
+#include "ComponentFactory.h"
+
+namespace {
+    struct XORGateProtoType {
+        XORGateProtoType() {
+            ComponentFactory::getInstance().registerPrototype("XOR", new XORGate("prototype"));
+        }
+    };
+    static XORGateProtoType reg;
+}
 
 XORGate::XORGate(const std::string& id, int propagationDelay)
     : LogicGate(id, 2, propagationDelay) {}

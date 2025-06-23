@@ -21,7 +21,13 @@
  */
 class ComponentFactory {
 public:
+    static ComponentFactory& getInstance() {
+        static ComponentFactory instance; // Singleton patroon
+        return instance;
+    }
+private:
     ComponentFactory() = default;
+public:
 
     /**
      * @brief Registreer een prototype component

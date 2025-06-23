@@ -1,4 +1,14 @@
 #include "NANDGate.h"
+#include "ComponentFactory.h"
+
+namespace {
+    struct NANDGateProtoType {
+        NANDGateProtoType() {
+            ComponentFactory::getInstance().registerPrototype("NAND", new NANDGate("prototype"));
+        }
+    };
+    static NANDGateProtoType reg;
+}
 
 NANDGate::NANDGate(const std::string& id, int propagationDelay)
     : LogicGate(id, 2, propagationDelay) {}

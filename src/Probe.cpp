@@ -1,4 +1,14 @@
 #include "Probe.h"
+#include "ComponentFactory.h"
+
+namespace {
+    struct ProbeProtoType {
+        ProbeProtoType() {
+            ComponentFactory::getInstance().registerPrototype("PROBE", new Probe("prototype"));
+        }
+    };
+    static ProbeProtoType reg;
+}
 
 Probe::Probe(const std::string& id)
     : Component(id, 10), recordedValue(false), observedComponent(nullptr) {}

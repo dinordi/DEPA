@@ -1,4 +1,14 @@
 #include "ORGate.h"
+#include "ComponentFactory.h"
+
+namespace {
+    struct ORGateProtoType {
+        ORGateProtoType() {
+            ComponentFactory::getInstance().registerPrototype("OR", new ORGate("prototype"));
+        }
+    };
+    static ORGateProtoType reg;
+}
 
 ORGate::ORGate(const std::string& id, int propagationDelay)
     : LogicGate(id, 2, propagationDelay) {}
